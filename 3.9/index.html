@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Ejercicio 9. Gestión básica de ratón 2</title>
+<title>Realizado por: Irene Mendoza Mederos y José Manuel Gómez Ruiz</title>
+<meta charset="UTF-8" />
+<style>
+div {
+    width: 400px;
+    height: 400px;
+    border: 1px solid black;
+    margin: 10px;
+    float: left;
+    padding: 30px;
+    text-align: center;
+    background-color: lightgray;
+}
+p {
+    background-color: white;
+	text-align: left;	
+}
+</style>
+</head>
+<body>
+<table>
+<td>
+<div id="cuadro1"><p id="parrafo1">Párrafo1</p></div> 
+</td>
+<td>
+<div id="cuadro2"><p id="parrafo2">Párrafo2</p></div> 
+</td>
+</table>
+
+<p id="parrafo3">Párrafo 3</p>
+
+<script>
+var cuadro1 = document.getElementById("cuadro1");
+var cuadro2 = document.getElementById("cuadro2");
+
+manejarVentana.addEventListener("keypress", manejateclado, false);
+manejarVentana.addEventListener("keyup", manejateclado, false);
+manejarVentana.addEventListener("keydown", manejateclado, false);
+manejarVentana.addEventListener("mousedown", manejarVentana, false);
+manejarVentana.addEventListener("mouseup", manejarVentana, false);
+manejarVentana.addEventListener("mouseover", manejarVentana, false);
+manejarVentana.addEventListener("mouseout", manejarVentana, false);
+manejarVentana.addEventListener("mousemove", manejarVentana, false);
+manejarVentana.addEventListener("click", manejarVentana, false);
+manejarVentana.addEventListener("contextmenu", manejarVentana, false);
+window.addEventListener("dblclick", manejarVentana, false);
+
+var X = 400, Y = 400;
+
+// contadores globales (ventana)
+var eventosmousedown = 0, eventosmouseup = 0, eventosmouseover = 0,
+    eventosmouseout = 0, eventosmousemove = 0, eventosclick = 0,
+    eventoscontextmenu = 0, eventosdblclick = 0;
+
+// contadores cuadro 1
+var c1_mousedown=0, c1_mouseup=0, c1_mouseover=0, c1_mouseout=0, c1_mousemove=0, c1_click=0, c1_contextmenu=0, c1_dblclick=0;
+// contadores cuadro 2
+var c2_mousedown=0, c2_mouseup=0, c2_mouseover=0, c2_mouseout=0, c2_mousemove=0, c2_click=0, c2_contextmenu=0, c2_dblclick=0;
+
+cuadro1.addEventListener("mousedown", manejaratonCuadro1, false);
+cuadro1.addEventListener("mouseup", manejaratonCuadro1, false);
+cuadro1.addEventListener("mouseover", manejaratonCuadro1, false);
+cuadro1.addEventListener("mouseout", manejaratonCuadro1, false);
+cuadro1.addEventListener("mousemove", manejaratonCuadro1, false);
+cuadro1.addEventListener("click", manejaratonCuadro1, false);
+cuadro1.addEventListener("contextmenu", manejaratonCuadro1, false);
+cuadro1.addEventListener("dblclick", manejaratonCuadro1, false);
+
+cuadro2.addEventListener("mousedown", manejaratonCuadro2, false);
+cuadro2.addEventListener("mouseup", manejaratonCuadro2, false);
+cuadro2.addEventListener("mouseover", manejaratonCuadro2, false);
+cuadro2.addEventListener("mouseout", manejaratonCuadro2, false);
+cuadro2.addEventListener("mousemove", manejaratonCuadro2, false);
+cuadro2.addEventListener("click", manejaratonCuadro2, false);
+cuadro2.addEventListener("contextmenu", manejaratonCuadro2, false);
+cuadro2.addEventListener("dblclick", manejaratonCuadro2, false);
+
+
+function manejaratonCuadro1(e)
+{
+	switch (e.type)
+	{
+		case "mousedown": c1_mousedown++; break;
+        case "mouseup": c1_mouseup++; break;
+        case "mouseover": c1_mouseover++; break;
+        case "mouseout": c1_mouseout++; break;
+        case "mousemove": c1_mousemove++; break;
+        case "click": c1_click++; break;
+        case "contextmenu": c1_contextmenu++; break;
+        case "dblclick": c1_dblclick++; break;
+    }
+	
+	var texto = "mousedown:" + c1_mousedown +" mouseup:" + c1_mouseup +
+                " mouseout:" + c1_mouseout + " mouseover:" + c1_mouseover +
+				" mousemove:" + c1_mousemove + " click:" + c1_click +
+				" contextmenu:" + c1_contextmenu + " dblclick:" + c1_dblclick;
+	
+	document.getElementById("parrafo1").innerHTML = texto;
+}
+
+function manejaratonCuadro2(e)
+{
+	switch (e.type)
+	{
+		case "mousedown": c2_mousedown++; break;
+        case "mouseup": c2_mouseup++; break;
+        case "mouseover": c2_mouseover++; break;
+        case "mouseout": c2_mouseout++; break;
+        case "mousemove": c2_mousemove++; break;
+        case "click": c2_click++; break;
+        case "contextmenu": c2_contextmenu++; break;
+        case "dblclick": c2_dblclick++; break;
+    }
+	
+	var texto = "mousedown:" + c2_mousedown +" mouseup:" + c2_mouseup +
+                " mouseout:" + c2_mouseout + " mouseover:" + c2_mouseover +
+				" mousemove:" + c2_mousemove + " click:" + c2_click +
+				" contextmenu:" + c2_contextmenu + " dblclick:" + c2_dblclick;
+	
+	document.getElementById("parrafo2").innerHTML = texto;
+}
+
+function manejateclado (e)
+{
+    if (e.type === "keydown")
+    {
+        switch (e.key)
+        {
+            case "ArrowRight": X++; break;
+            case "ArrowLeft": if (X > 0) X--; break;
+            case "ArrowUp": Y++; break;
+            case "ArrowDown": if (Y > 0) Y--;break;
+        }
+    }
+    //Aquí no se modifica el párrafo 3
+    document.getElementById("cuadro1").style.height = Y+"px";
+    document.getElementById("cuadro1").style.width = X+"px";
+    document.getElementById("cuadro2").style.height = Y+"px";
+    document.getElementById("cuadro2").style.width = X+"px";
+	
+}
+
+function manejarVentana(e)
+{
+    switch (e.type)
+    {
+        case "mousedown": eventosmousedown++; break;
+        case "mouseup": eventosmouseup++; break;
+        case "mouseover": eventosmouseover++; break;
+        case "mouseout": eventosmouseout++; break;
+        case "mousemove": eventosmousemove++; break;
+        case "click": eventosclick++; break;
+        case "contextmenu": eventoscontextmenu++; break;
+        case "dblclick": eventosdblclick++; break;
+    }
+
+    document.getElementById("parrafo3").innerHTML =
+      "mousedown:" + eventosmousedown + " mouseup:" + eventosmouseup +
+      " mouseout:" + eventosmouseout + " mouseover:" + eventosmouseover +
+      " mousemove:" + eventosmousemove + " click:" + eventosclick +
+      " contextmenu:" + eventoscontextmenu + " dblclick:" + eventosdblclick;
+}
+
+// inicialización al cargar
+document.getElementById("parrafo1").innerHTML = "mousedown:0 mouseup:0 mouseout:0 mouseover:0 mousemove:0 click:0 contextmenu:0 dblclick:0";
+document.getElementById("parrafo2").innerHTML = "mousedown:0 mouseup:0 mouseout:0 mouseover:0 mousemove:0 click:0 contextmenu:0 dblclick:0";
+document.getElementById("parrafo3").innerHTML = "mousedown:0 mouseup:0 mouseout:0 mouseover:0 mousemove:0 click:0 contextmenu:0 dblclick:0";
+
+</script>
+
+</body>
+</html>
