@@ -1,0 +1,63 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Ejercicio 8. Puntos y rectas</title>
+<meta charset="UTF-8" />
+    <style>
+      canvas {
+        margin: 0px;
+        padding: 0px;
+		border:1px solid #000000;
+		background-color: lightgray;
+      }
+    </style>
+  </head>
+  <body>
+  <body>
+    <div>
+      <canvas id="lienzo1" width="800" height="600"></canvas>
+	</div>
+	<div>
+	  <canvas style="background-color: white;" id="lienzo2" width="800" height="100"></canvas>
+	</div>
+    <script>
+      
+    var contextoGrafico = document.getElementById('lienzo1').getContext('2d');
+	var contextoTexto = document.getElementById('lienzo2').getContext('2d');
+
+	contextoTexto.font="18px Courier New";
+	contextoTexto.fillText("Información gráfica:",10,30);
+	contextoTexto.font="28px Times New";
+	contextoTexto.strokeText("X = 0 Y = 0",10,60);
+	  
+	//dibujamos los marcos llamando a la función para cada contexto gráfico indicando el ancho del marco
+	dibujaPlantilla(contextoGrafico, 30);
+	dibujaPlantilla(contextoTexto, 5);
+
+	dibujaTrazo(contextoGrafico);
+	
+	//función que dibuja una recta entre (50,50) y (100,100), luego hace zigzag hacia abajo
+	function dibujaTrazo(contexto)
+	{
+        contexto.beginPath();
+        contexto.moveTo(50,50); //Para el punto inicial
+		for (let i=0; i<10; i++)
+        {
+            contexto.lineTo(50 + i*50, 50 + (i%2)*50);
+        }
+        contexto.stroke();
+	}
+	  
+	function dibujaPlantilla(contexto, ancho)
+	  {
+		var anterior = contexto.lineWidth; //guardamos el tamaño actual para poder restaurarlo luego
+		contexto.lineWidth = ancho;
+		//ojo, el trazo dibuja su ancho a ambos lados de la coordenada inicial, por lo que tenemos que pintar el cuadro un poco hacia adentro si queremos que salga entero
+		contexto.strokeRect(0+ancho/2,0+ancho/2,contexto.canvas.clientWidth-ancho,contexto.canvas.clientHeight-ancho)
+		contexto.lineWidth = anterior;	//restauramos el ancho original		
+	  }
+
+    </script>
+  </body>
+</html>  
