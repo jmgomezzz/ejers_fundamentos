@@ -1,0 +1,139 @@
+<!-- TEMA 4, EJERCICIO 24-->
+ <!-- Realizado por José Manuel Gómez Ruiz e Irene Mendoza Mederos-->
+  
+<!DOCTYPE html>
+<html>
+<head>
+<title>Ejercicio 24.</title>
+<meta charset="UTF-8" />
+    <style>
+      canvas {
+        margin: 0px;
+        padding: 0px;
+		border:1px solid #000000;
+		background-color: lightgray;
+      }
+    </style>
+  </head>
+  <body>
+  <body>
+    <div>
+      <canvas id="lienzo1" width="800" height="600"></canvas>
+	</div>
+	<div>
+	  <canvas style="background-color: white;" id="lienzo2" width="800" height="100"></canvas>
+	</div>
+    <script> 
+    var contextoGrafico = document.getElementById('lienzo1').getContext('2d');
+	var contextoTexto = document.getElementById('lienzo2').getContext('2d');
+
+	document.getElementById('lienzo1').addEventListener("mousemove", manejaraton, true);
+	// si el ratón se mueve muy ràpido puede que mouseover no detecte su salida del lienzo, así que se maneja también mouseout
+	document.getElementById('lienzo1').addEventListener("mouseout", manejaraton, true);
+	document.getElementById('lienzo1').addEventListener("click", manejaraton, true);
+	
+	//definimos por comodidad una variable para el ancho del marco rojo
+	var ANCHO_MARCO = 30;
+
+	//dibujamos los marcos llamando a la función para cada contexto gráfico indicando el ancho del marco
+	dibujaPlantilla(contextoGrafico, ANCHO_MARCO);
+
+	var primerClick = true;
+
+    //Objeto de audio
+    var sonidoPing = new Audio('ping.mp3');
+	
+	
+	//dibujamos el círculo
+	//definimos el camino del área de recorte
+	var recorte = new Path2D();
+	recorte.arc(400,300,200,0,2*Math.PI);	
+	contextoGrafico.stroke(recorte);
+	
+	//usamos el camino como área de recorte
+	contextoGrafico.clip(recorte);
+	
+	function manejaraton(e)
+	{
+	
+		var dimensionesinternas = this.getBoundingClientRect();
+		var posCuadroX = e.pageX - dimensionesinternas.left;	
+		var posCuadroY = e.pageY - dimensionesinternas.top;
+		// La zona gris es de tamaño 800x600 menos el tamaño del marcho rojo y menos el borde de 1px del estilo del lienzo
+		var minX = ANCHO_MARCO + 1;
+		var minY = ANCHO_MARCO + 1;
+		var maxX = dimensionesinternas.width - ANCHO_MARCO - 2; //se restan 2 a X en vez de 1 porque para ancho 800 la última posición es 799
+		var maxY = dimensionesinternas.height - ANCHO_MARCO - 2; //lo mismo para Y
+		//solo procesamos el evento y actualizamos las coordenadas si caen dentro del X e Y máximos
+
+		switch (e.type)
+		{
+			
+			case "mousemove":
+					if (posCuadroX >= minX && posCuadroX <= maxX && posCuadroY >= minY && posCuadroY <= maxY )
+					{
+						var texto = "X=" + posCuadroX + " Y=" + posCuadroY;
+					}
+					else
+					{
+						var texto = "Fuera de límites";
+					}
+			    break;			
+				
+			case "mouseout":
+				var texto = "Fuera de límites";
+				break;
+				
+			case "click":
+				//solo gestionamos el click si las coordenadas están dentro del lienzo gris
+				if (posCuadroX >= minX && posCuadroX <= maxX && posCuadroY >= minY && posCuadroY <= maxY )
+				{
+					if (primerClick == true)
+					{ //primera vez que pulsamos el botón del ratón, usamos ese punto como punto de origen de la recta
+						primerClick = false;
+						//posicionamos el camino en posición donde hicimos click
+						contextoGrafico.beginPath();
+						contextoGrafico.moveTo(posCuadroX, posCuadroY);
+						var texto = "Fijado punto inicial";
+					}
+					else
+					{
+					  //si no es la primera vez que hacemos click,  trazamos la línea al punto donde estemos
+					  contextoGrafico.lineTo(posCuadroX, posCuadroY);
+					  //pintamos
+					  contextoGrafico.stroke();
+                      //reproducimos el sonido
+                      sonidoPing.currentTime = 0; //reiniciamos el audio para poder solapar sonidos
+                      sonidoPing.play();
+					  //el camino tiene ahora un nuevo comienzo. Si no, pinta todo el camino desde el principio cada vez
+						contextoGrafico.beginPath();
+						contextoGrafico.moveTo(posCuadroX, posCuadroY);
+					  var texto = "Trazo a X=" + posCuadroX + " Y=" + posCuadroY;
+					}
+				}
+				
+		}
+		
+		contextoTexto.clearRect(0,0,800,100);
+		contextoTexto.font="18px Courier New";
+		contextoTexto.fillText("Información gráfica:",10,30);
+		contextoTexto.font="28px Times New";
+		contextoTexto.strokeText(texto,10,60);						
+	}
+
+	 
+	function dibujaPlantilla(contexto, ancho)
+	  {
+		var anteriorancho = contexto.lineWidth; //guardamos el tamaño actual para poder restaurarlo luego
+		var anteriorestilo = contexto.strokeStyle; //guardamos el estilo anterior
+		contexto.lineWidth = ancho;
+		contexto.strokeStyle="#FF0000";
+		//ojo, el trazo dibuja su ancho a ambos lados de la coordenada inicial, por lo que tenemos que pintar el cuadro un poco hacia adentro si queremos que salga entero
+		contexto.strokeRect(0+ancho/2,0+ancho/2,contexto.canvas.clientWidth-ancho,contexto.canvas.clientHeight-ancho)
+		contexto.lineWidth = anteriorancho;	//restauramos el ancho original
+		contexto.strokeStyle=anteriorestilo; //restauramos el estilo original
+	  }
+
+    </script>
+  </body>
+</html>  
