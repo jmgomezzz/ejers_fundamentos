@@ -1,0 +1,76 @@
+<!-- TEMA 4, EJERCICIO 14-->
+ <!-- Realizado por José Manuel Gómez Ruiz e Irene Mendoza Mederos-->
+  
+<!DOCTYPE html>
+<html>
+<head>
+<title>Ejercicio 14.</title>
+<meta charset="UTF-8" />
+    <style>
+      canvas {
+        margin: 0px;
+        padding: 0px;
+		border:1px solid #000000;
+		background-color: lightgray;
+      }
+    </style>
+  </head>
+  <body>
+  <body>
+    <div>
+      <canvas id="lienzo1" width="800" height="600"></canvas>
+	</div>
+	<div>
+	  <canvas style="background-color: white;" id="lienzo2" width="800" height="100"></canvas>
+	</div>
+    <script>
+    var contextoGrafico = document.getElementById('lienzo1').getContext('2d');
+	var contextoTexto = document.getElementById('lienzo2').getContext('2d');
+
+	contextoTexto.font="18px Courier New";
+	contextoTexto.fillText("Información gráfica:",10,30);
+	contextoTexto.font="28px Times New";
+	contextoTexto.strokeText("X = 0 Y = 0",10,60);
+	  
+	//dibujamos los marcos llamando a la función para cada contexto gráfico indicando el ancho del marco
+	dibujaPlantilla(contextoGrafico, 30);
+	dibujaPlantilla(contextoTexto, 5);
+
+	dibujaTrazo(contextoGrafico);
+	
+	function dibujaTrazo(contexto)
+	{
+	  contexto.beginPath();
+      contexto.moveTo(150, 150);
+      contexto.quadraticCurveTo(50, 50, 250, 150);
+	  contexto.quadraticCurveTo(500, 100, 350, 350);
+
+    //Degradado negro-amarillo-blanco
+    var degradado = contexto.createLinearGradient(150, 150, 350, 350);
+    degradado.addColorStop(0, "black"); // Color inicial negro
+    degradado.addColorStop(0.5, "yellow"); // Color intermedio amarillo
+    degradado.addColorStop(1, "white"); // Color final blanco
+
+	  contexto.fillStyle = degradado;
+	  contexto.closePath();
+	  contexto.fill();
+	  
+      contexto.lineWidth = 10;
+      contexto.strokeStyle = 'blue';
+      contexto.stroke();
+		
+	}
+
+	
+	function dibujaPlantilla(contexto, ancho)
+	  {
+		var anterior = contexto.lineWidth; //guardamos el tamaño actual para poder restaurarlo luego
+		contexto.lineWidth = ancho;
+		//ojo, el trazo dibuja su ancho a ambos lados de la coordenada inicial, por lo que tenemos que pintar el cuadro un poco hacia adentro si queremos que salga entero
+		contexto.strokeRect(0+ancho/2,0+ancho/2,contexto.canvas.clientWidth-ancho,contexto.canvas.clientHeight-ancho)
+		contexto.lineWidth = anterior;	//restauramos el ancho original		
+	  }
+
+    </script>
+  </body>
+</html>  
