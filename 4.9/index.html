@@ -44,19 +44,18 @@
         contexto.moveTo(50,50); //Para el punto inicial
         //Bucle for para hacer zigzag hacia abajo
 		for (let i=1; i<10; i++)
+    {
+        if (i%2==1)  //Si es impar
         {
-            //Si i es par vamos a la derecha, si es impar vamos a la izquierda
-            if (i%2==0)
-            {
-                contexto.lineTo(100, 50 + i*50);
-            }
-            else
-            {
-                contexto.lineTo(50, 50 + i*50);
-            }
+            contexto.lineTo(100, 50 + i*50);
         }
-        contexto.stroke();
-	}
+        else
+        {
+            contexto.lineTo(50, 50 + i*50);
+        }
+    }
+    contexto.stroke();
+}
 	  
 	function dibujaPlantilla(contexto, ancho)
 	  {
