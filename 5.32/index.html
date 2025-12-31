@@ -1,8 +1,9 @@
-
+<!-- TEMA 5, EJERCICIO 32-->
+ <!-- Realizado por José Manuel Gómez Ruiz e Irene Mendoza Mederos-->
 <!DOCTYPE html>
 <html>
 <head>
-<title>Ejercicio 31. Animación con sprites</title>
+<title>Ejercicio 32.</title>
 <meta charset="UTF-8" />
     <style>
       canvas {
@@ -41,11 +42,47 @@
 		var numeroSprite = 16;
 		
 		var temporizador;
+
+        //dibujar el escenario
+        function dibujaEscenario(){
+            //suelo
+            contextoAnimacion.fillStyle = "black";
+            contextoAnimacion.fillRect(0, 267, maxX, 33);
+
+            //linea superior del suelo con relleno
+            contextoAnimacion.fillStyle = "black";
+            contextoAnimacion.beginPath();
+            contextoAnimacion.moveTo(0, 300);
+            contextoAnimacion.lineTo(420, 300);
+            contextoAnimacion.lineTo(420, 200);
+            contextoAnimacion.lineTo(maxX, 200);
+            contextoAnimacion.lineTo(maxX, 340);  // termina en y=340, dejando hueco hasta y=400
+            contextoAnimacion.lineTo(420, 340);
+            contextoAnimacion.lineTo(420, 340);
+            contextoAnimacion.lineTo(0, 340);
+            contextoAnimacion.closePath();
+            contextoAnimacion.fill();
+            
+            // Línea de borde superior
+            contextoAnimacion.strokeStyle = "black";
+            contextoAnimacion.lineWidth = 3;
+            contextoAnimacion.beginPath();
+            contextoAnimacion.moveTo(0, 300);
+            contextoAnimacion.lineTo(420, 300);
+            contextoAnimacion.lineTo(420, 200);
+            contextoAnimacion.lineTo(maxX, 200);
+            contextoAnimacion.stroke();
+
+
+        }
 		
 		//esta función dibuja el sprite desplazándolo a la derecha un poco cada vez
 		function actualizaCuadro()
 		{			
 			contextoAnimacion.clearRect(0, 0, maxX, maxY);
+
+            //dibujamos el escenario
+            dibujaEscenario();
 			listaSprites[numeroSprite].dibuja(contextoAnimacion, posSpriteX, 200, 1);
 			posSpriteX += velocidad;
 			numeroSprite++;
@@ -140,4 +177,4 @@
 		
 		</script>
   </body>
-</html>  
+</html>
