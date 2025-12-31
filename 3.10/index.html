@@ -125,6 +125,9 @@ function manejaratongenerico(e)
 	texto += " Page X=" + e.pageX + " Y=" + e.pageY;
 	
 	var dimensionesinternas = this.getBoundingClientRect();
+	var posCuadroX = e.clientX - dimensionesinternas.left;
+	var posCuadroY = e.clientY - dimensionesinternas.top;
+	
 	texto += " Posición del cuadro: " + dimensionesinternas.left + "," +dimensionesinternas.top + " a " + dimensionesinternas.right + "," + dimensionesinternas.bottom;
 	
 	/*las posiciones relativas dentro del cuadro se sacan restando las posiciones absolutas en la página y el tamaño del cuadro*/
@@ -159,6 +162,15 @@ function manejateclado (e)
 
 }
 
+// inicializar al cargar
+window.addEventListener("load", function () {
+    inicializaCuadro(document.getElementById("cuadro1"));
+    inicializaCuadro(document.getElementById("cuadro2"));
+    // inicializar textos
+    document.getElementById("parrafo1").innerHTML = "mousedown:0 mouseup:0 mouseout:0 mouseover:0 mousemove:0 click:0 contextmenu:0 dblclick:0";
+    document.getElementById("parrafo2").innerHTML = "mousedown:0 mouseup:0 mouseout:0 mouseover:0 mousemove:0 click:0 contextmenu:0 dblclick:0";
+    document.getElementById("parrafo3").innerHTML = "";
+});
 </script>
 
 </body>
