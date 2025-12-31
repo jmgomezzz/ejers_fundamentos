@@ -72,34 +72,42 @@ function manejaratongenerico(e)
 		case "mousedown":this.eventosmousedown++;break;
 		case "mouseup":this.eventosmouseup++;break;
 		case "mouseover":this.eventosmouseover++;
-                         this.style.backgroundColor = "red";
+		 				if (this.cambia == false)
+                           this.style.backgroundColor = "red";
 						 break;
+                         
 		case "mouseout":this.eventosmouseout++;
-		                this.style.backgroundColor = "lightgray";
-		                break;
+					if (this.cambia == false)		
+		            	this.style.backgroundColor = "lightgray";
+		            break;
 		case "mousemove":this.eventosmousemove++;break;
 		case "click":this.eventosclick++;
-		             this.style.backgroundColor = "green";
-					 break;
-		case "contextmenu":this.eventoscontextmenu++;break;
+					if (this.cambia == false)
+		                this.style.backgroundColor = "green";
+					break;
+		case "contextmenu":this.eventoscontextmenu++;
+					break;
 		case "dblclick":
             this.eventosdblclick++;
             if (!this.isResizing)
             {
                 // activar cambio de tamaño
-                this.isResizing = true;
-                this.prevBackgroundColor = this.style.backgroundColor || "lightgray";
+                this.cambia = true;
+                this.colorAnterior = this.style.backgroundColor || "lightgray";
+				this.resizeAnterior = this.style.resize;
+				this.overflowAnterior = this.style.overflow;
                 this.style.backgroundColor = "yellow";
                 this.style.resize = "both";
                 this.style.overflow = "auto";
             }
             else
             {
-                // desactivar cambio de tamaño y restaurar color
+                // desactivar cambio de tamaño y volver al color anterior
                 this.isResizing = false;
-                this.style.backgroundColor = this.prevBackgroundColor || "lightgray";
-                this.style.resize = "none";
-            }
+                this.style.backgroundColor = this.colorAnterior || "lightgray";
+                this.style.resize = this.resizeAnterior;
+				this.style.overflow = this.overflowAnterior;
+            }	
             break;
 	}
 	
@@ -143,35 +151,11 @@ function manejaratongenerico(e)
 
 function manejateclado (e)
 {
-	if (e.type === "keydown")
-	{
-		switch (e.key)
-		{
-			case "ArrowRight": X++; break;
-			case "ArrowLeft": if (X > 0) X--; break;
-			case "ArrowUp": Y++; break;
-			case "ArrowDown": if (Y > 0) Y--;break;
-		}
-	}
-	var texto = "X:" + X + " Y:" + Y;
-	document.getElementById("parrafo3").innerHTML = texto;
-	document.getElementById("cuadro1").style.height = Y+"px";
-	document.getElementById("cuadro1").style.width = X+"px";
-	document.getElementById("cuadro2").style.height = Y+"px";
-	document.getElementById("cuadro2").style.width = X+"px";
+	//manejar tamaño por teclado eliminada
 
 }
-
-// inicializar al cargar
-window.addEventListener("load", function () {
-    inicializaCuadro(document.getElementById("cuadro1"));
-    inicializaCuadro(document.getElementById("cuadro2"));
-    // inicializar textos
-    document.getElementById("parrafo1").innerHTML = "mousedown:0 mouseup:0 mouseout:0 mouseover:0 mousemove:0 click:0 contextmenu:0 dblclick:0";
-    document.getElementById("parrafo2").innerHTML = "mousedown:0 mouseup:0 mouseout:0 mouseover:0 mousemove:0 click:0 contextmenu:0 dblclick:0";
-    document.getElementById("parrafo3").innerHTML = "";
-});
 </script>
 
 </body>
 </html>
+
