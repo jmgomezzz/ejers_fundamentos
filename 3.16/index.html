@@ -113,12 +113,13 @@ function manejarBoton(e){
 	  cuadro.cambiable = false;
 	  cuadro.style.resize = cuadro.resizeAnterior;
 	  cuadro.style.overflow = cuadro.overflowAnterior;
-	  cuadro.style.backgroundColor = cuadro.colorAnterior;	
    }
    
    var parrafo = (cuadro.id === "cuadro1") ? document.getElementById("parrafo1") : document.getElementById("parrafo2");
    parrafo.innerHTML = "Párrafo reiniciado";
    parrafo.style.backgroundColor = "white";
+
+
 
 
 }
