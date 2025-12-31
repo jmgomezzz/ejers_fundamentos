@@ -1,0 +1,637 @@
+<!-- TEMA 5, EJERCICIO 48-->
+ <!-- Realizado por José Manuel Gómez Ruiz e Irene Mendoza Mederos-->
+  
+<!DOCTYPE html>
+<html>
+<head>
+<title>Ejercicio 48.</title>
+<meta charset="UTF-8" />
+    <style>
+      canvas {
+        margin: 0px;
+        padding: 0px;
+		border:1px solid #000000;
+		background-color: lightgray;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <canvas id="lienzoAnimacion" width="576" height="264"></canvas>
+	</div>
+	<div>
+	  <p id="parrafo">Texto</p>
+	</div>	
+	<div>
+	  <p id="parrafo2">Texto</p>
+	</div>		
+	<div>
+      <canvas id="lienzoSpritesSeleccionados" width="384" height="24"></canvas>
+	 </div>
+	 <div>
+      <canvas id="lienzoTilesSeleccionados" width="888" height="24"></canvas>
+	</div>		
+	<div>
+      <canvas id="lienzoSprites" width="192" height="648"></canvas>
+      <canvas id="lienzoTiles" width="264" height="336"></canvas>
+	</div>	
+    <script>
+		var contextoAnimacion = document.getElementById('lienzoAnimacion').getContext('2d');
+		var contextoSprites = document.getElementById('lienzoSprites').getContext('2d');
+		var contextoSpritesSeleccionados = document.getElementById('lienzoSpritesSeleccionados').getContext('2d');	
+		var contextoTiles = document.getElementById('lienzoTiles').getContext('2d');		
+		var contextoTilesSeleccionados = document.getElementById('lienzoTilesSeleccionados').getContext('2d');				
+		
+		var lienzoAnimacion = document.getElementById('lienzoAnimacion');
+		var lienzoSprites = document.getElementById('lienzoSprites');
+		var lienzoSpritesSeleccionados = document.getElementById('lienzoSpritesSeleccionados');
+		var lienzoTiles = document.getElementById('lienzoTiles');
+		var lienzoTilesSeleccionados = document.getElementById('lienzoTilesSeleccionados');
+		
+		var parrafo = document.getElementById('parrafo');
+		var parrafo2 = document.getElementById('parrafo2');
+		
+		var ARRIBA  	= "arriba";
+		var ABAJO   	= "abajo";
+		var DERECHA 	= "derecha";
+		var IZQUIERDA 	= "izquierda";
+		var NOACCION    = "";
+		
+		var maxX = lienzoAnimacion.width;
+		var maxY = lienzoAnimacion.height;
+		
+		var CABALLERO = 0; //posición inicial del sprite del caballero
+		var ZORRO     = 8; //posición inicial del sprite del zorro
+		var HIERBA    = 0;
+		
+		var ANCHOSPRITE = 24; //en este caso sprites y tiles son iguales
+		var ALTOSPRITE = 24;  // así que usamos los mismos valores para ambos		
+		
+		//hacer true para dibujar las trazas
+		var muestraTraza = true;
+		//hacer true para dibujar la rejilla
+		var muestraRejilla = false;
+		
+		var graficosCargados = false;
+		
+		//variable para guardar todos los sprites
+		var listaSprites = new Array(16);
+		var listaTiles = new Array(37);
+		
+		//cargamos los sprites
+		cargaImagen();
+		
+		//construimos el mapa y sus actores
+		var mapa = new constructorMapa();		
+		mapa.caballero 	= new constructorActor(3*ANCHOSPRITE,3*ALTOSPRITE, "caballero", 3, listaSprites, 0);
+		mapa.zorro 		= new constructorActor(18*ANCHOSPRITE,5*ALTOSPRITE, "zorro", 2, listaSprites, 8);	
+		
+		//activamos el temporizador del lienzo
+		requestAnimationFrame(actualizaCuadro);
+		
+		
+		//eventos de teclado
+		window.addEventListener("keydown", manejateclado, false);	
+		
+		//manejador de teclado
+		function manejateclado (e)
+		{
+			if (e.type == "keydown")
+			{
+				if (e.keyCode == '38')
+				{
+					mapa.pulsacion = ARRIBA;
+				}
+				else if (e.keyCode == '40')
+				{
+					mapa.pulsacion = ABAJO;
+				}
+				else if (e.keyCode == '37')
+				{
+				   mapa.pulsacion = IZQUIERDA;
+				}
+				else if (e.keyCode == '39')
+				{
+				   mapa.pulsacion = DERECHA;
+				}
+			}
+				
+			e.preventDefault(); 
+		}
+		
+		
+		//la función de actualización del movimiento tiene su propio temporizador
+		//para estar desligada de la velocidad de actualización del cuadro
+		setInterval(actualizaMovimiento, 50);
+		
+		//función que actualiza las posiciones de los personajes (pero no los dibuja)
+		function actualizaMovimiento()
+		{
+			mapa.muevePersonajes();
+			mapa.actualizaRutaZorro();		
+		}
+		
+		//función que procesa las peticiones de movimiento y redibuja el lienzo
+		function actualizaCuadro()
+		{
+			if (graficosCargados == true)
+			{			
+				mapa.actualizaPulsacionesPendientes();
+				mapa.dibuja(lienzoAnimacion);
+			}
+			requestAnimationFrame(actualizaCuadro);
+		}
+			
+		//constructor para cada objeto de tipo sprite
+		//le pasamos una imagen y las coordenadas de la imagen de donde coger el sprite
+		function constructorSprite (imagenFuente, x, y, ancho, alto)
+		{			
+			var imagen = imagenFuente;	
+			this.x = x;
+			this.y = y;
+			this.ancho = ancho;
+			this.alto = alto;
+			
+			//dibuja el sprite en el contexto dado, en la posición x,y
+			this.dibuja = function(contexto, x, y)
+			{
+				contexto.drawImage(imagen, this.x, this.y, this.ancho, this.alto, x, y, this.ancho, this.alto);
+			}			
+		}
+		
+		//definimos al personaje como un sprite con una velocidad y la posición del primer sprite donde está guardado el personaje
+		function constructorActor(x, y, tipo, velocidad, vectorSprites, posicionSpriteBase)
+		{
+			//vector con los sprites del actor
+			this.vectorSprites = vectorSprites;
+			//posición actual del personaje en pixeles
+			this.x = x;
+			this.y = y;
+			//posicion a donde se quiere mover el personaje
+			this.xDestino = x;
+			this.yDestino = y;
+			//indicador de si se está moviendo o no
+			this.enMovimiento = false;
+			//velocidad de movimiento
+			this.velocidad = velocidad;
+			//posición dentro del vector de sprites donde está el primer sprite del personaje
+			this.posicionSpriteBase = posicionSpriteBase;
+			//sprite del personaje contando a partir del sprite base
+			this.spriteActual = 0;
+			//tipo de actor
+			this.tipo = tipo;
+
+			//esta función actualiza el sprite asociado al actor en función del movimiento
+			//que se le indique
+			this.actualizaSprite = function(direccion)
+			{
+				// sprite 0 = abajo (1)
+				// sprite 1 = abajo (2)
+				// sprite 2 = izquierda (1)
+				// sprite 3 = izquierda (2)
+				// sprite 4 = arriba (1)
+				// sprite 5 = arriba (2)
+				// sprite 6 = derecha (1)
+				// sprite 7 = derecha (2)
+				this.spriteActual++;
+				switch(direccion)
+				{
+					case ARRIBA:
+							if (this.spriteActual != 5)
+								this.spriteActual = 4;
+							break;
+					case ABAJO:
+							if (this.spriteActual != 1)
+								this.spriteActual = 0;
+							break;
+					case DERECHA:
+							if (this.spriteActual != 7)
+								this.spriteActual = 6;
+							break;
+					case IZQUIERDA:
+							if (this.spriteActual != 3)
+								this.spriteActual = 2;
+							break;										
+				}
+			}
+			
+			//dibuja al actor en el contexto gráfico facilitado
+			this.dibujaActor = function(contexto)
+			{
+				this.vectorSprites[this.posicionSpriteBase + this.spriteActual].dibuja(contexto, this.x, this.y);
+			}
+		}
+		
+		
+		//objeto mapa
+		function constructorMapa()
+		{
+			//dimensiones del mapa
+			var ALTOMAPA = 11;
+			var ANCHOMAPA = 24;	
+			//actores
+			this.caballero;
+			this.zorro;
+			//última pulsación de tecla hecha por el usuario
+			this.pulsacion = NOACCION;
+			//camino del zorro para usar con algoritmo A*
+			this.camino = []; 
+			
+			//matriz de tiles del mapa
+			this.mapa =
+			[
+				[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+				[6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 6],
+				[6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 6],
+				[6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 6],
+				[6, 7, 0, 0, 0, 0, 0, 0,10,13,13,14, 0, 0, 2,17,32,32,11, 0, 0, 0, 8, 6],
+				[6, 7, 0, 8, 6, 6, 6, 7,24,25,25,26, 0, 0, 2,34,31,31,35, 0, 0, 0, 8, 6],
+				[6, 7, 0, 0, 0, 0, 0, 0,24,25,25,26, 0, 0, 2,29,33,33,36, 0, 0, 0, 8, 6],
+				[6, 7, 0, 0, 0, 0, 0, 0,24,25,25,26, 0, 0, 2, 3, 2, 3, 2, 3, 0, 0, 8, 6],
+				[6, 7, 0, 0, 0, 0, 0, 0,18,19,19,28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 6],
+				[6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 6],
+				[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]
+			];
+
+			
+			//matriz de transparencia del mapa
+			this.transparente =
+			[
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+				[0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+				[0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+				[0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+				[0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+				[0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+				[0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0],
+				[0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+				[0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+			];
+			
+			//usada durante depuración para resaltar tiles concretos 
+			// x,y son coordenadas de un tile, no de un punto
+			marcaTile = function(x,y, color)
+			{		
+					var estilo = contextoAnimacion.strokeStyle;
+					contextoAnimacion.strokeStyle = color;
+					contextoAnimacion.strokeRect(x*ANCHOSPRITE,y*ALTOSPRITE, ANCHOSPRITE, ALTOSPRITE);			
+					contextoAnimacion.strokeStyle = estilo;
+			}
+
+			//usada durante depuración para resaltar áreas del mapa 
+			// x,y son coordenadas de un punto, no de un tile
+			marcaSprite = function(x,y, color)
+			{		
+					var estilo = contextoAnimacion.strokeStyle;
+					contextoAnimacion.strokeStyle = color;
+					contextoAnimacion.strokeRect(x,y, ANCHOSPRITE, ALTOSPRITE);			
+					contextoAnimacion.strokeStyle = estilo;
+			}
+			
+			//esta función calcula el tile que ocupa un sprite que esté en la posición (x,y)			
+			calculaTileOcupada = function (x, y)
+			{				
+				//tile de esquina superior izquierda
+				var tileX = Math.floor(x/ANCHOSPRITE);
+				var tileY = Math.floor(y/ALTOSPRITE);								
+				return {x: tileX, y: tileY};
+			}
+			
+			//dadas las coordenadas de un tile, indica si es atravesable o no			
+			this.esTileTransparente = function (x,y)
+			{
+				if (this.transparente[y][x] == 1)
+					return true;
+				else
+					return false;			
+			}
+			
+			//Esta función comprueba si el personaje se puede mover en la dirección solicitada en función del mapa
+			//y actualiza sus coordenadas
+			this.validaActualizaMovimiento = function(personaje, direccion)
+			{
+			
+				switch(direccion)
+				{
+					case ARRIBA:
+								var futuraY  = personaje.y - ALTOSPRITE;
+								var futuraX  = personaje.x;
+							break;
+					case ABAJO:							
+								var futuraY = personaje.y + ALTOSPRITE;
+								var futuraX = personaje.x;								
+							break;
+							
+					case DERECHA:
+								var futuraY = personaje.y;
+								var futuraX = personaje.x + ANCHOSPRITE;	
+							break;
+					case IZQUIERDA:
+								var futuraY = personaje.y;
+								var futuraX = personaje.x - ANCHOSPRITE;								
+							break;
+				}
+				
+				var tileFutura = calculaTileOcupada(futuraX, futuraY);					
+				//cambiamos la coordenada solo si los tiles de destino son transparentes				
+				if (this.esTileTransparente(tileFutura.x, tileFutura.y) == true && personaje.enMovimiento == false)
+				{
+					personaje.yDestino = futuraY;
+					personaje.xDestino = futuraX;
+					personaje.enMovimiento = true;
+				}
+			}
+
+			
+			//comprueba si el personaje ha llegado o no a su destino
+			movimientoTerminado = function (personaje)
+			{
+				if (personaje.x == personaje.xDestino && personaje.y == personaje.yDestino)
+				{
+					personaje.enMovimiento = false;
+					return true;
+				}
+				else
+					return false;
+			
+			}
+			
+			//si hay una acción de movimiento pendiente y el caballero ya terminó su último movimiento, vamos con el siguiente			
+			this.actualizaPulsacionesPendientes = function()
+			{				
+				if (this.pulsacion != NOACCION && movimientoTerminado(this.caballero) == true)
+				{
+					this.validaActualizaMovimiento(this.caballero, this.pulsacion);
+					//si la siguiente linea está comentada, el personaje no se detiene hasta no dar con un objeto no atravesable
+					//this.pulsacion = NOACCION;
+				}
+			}
+			
+			//actualiza las coordenadas de cada personaje
+			this.muevePersonajes = function()
+			{
+				muevePersonaje(this.caballero);
+				muevePersonaje(this.zorro);
+			}
+			
+			//función encargada de actualizar las posiciones de un personaje en función de su destino y velocidad
+			muevePersonaje = function(personaje)
+			{
+				if (personaje.enMovimiento == true)
+				{
+					if (personaje.x < personaje.xDestino)
+					{
+						personaje.x += personaje.velocidad;
+						//si la velocidad no es múltiplo de la posición puede que nos pasemos
+						//en ese caso solo avanzamos hasta el destino
+						if (personaje.x > personaje.xDestino)
+							personaje.x = personaje.xDestino;
+						personaje.actualizaSprite(DERECHA);
+					}
+					else
+					if (personaje.x > personaje.xDestino)
+					{
+						personaje.x -= personaje.velocidad;
+						if (personaje.x < personaje.xDestino)
+							personaje.x = personaje.xDestino;						
+						personaje.actualizaSprite(IZQUIERDA);
+					}
+					else
+					if (personaje.y < personaje.yDestino)	
+					{
+						personaje.y += personaje.velocidad;					
+						if (personaje.y > personaje.yDestino)
+							personaje.y = personaje.yDestino;
+						
+						personaje.actualizaSprite(ABAJO);
+					}
+					else
+					if (personaje.y > personaje.yDestino)
+					{
+						personaje.y -= personaje.velocidad;
+						if (personaje.y < personaje.yDestino)
+							personaje.y = personaje.yDestino;
+						
+						personaje.actualizaSprite(ARRIBA);
+					}
+					else
+					//el personaje ha llegado al destino
+						personaje.enMovimiento = false;
+				}
+			
+			}
+			
+			
+			//calcula la ruta a seguir por el zorro para alcanzar al caballero
+			this.actualizaRutaZorro = function()
+			{
+
+                //Solo calcular si zorro no esta en movimeinto
+                if (movimientoTerminado(this.zorro) == false)
+                    return;
+
+				var azar = Math.random();
+				//calculamos diferencias de posición
+                var diferenciaX = this.caballero.x - this.zorro.x;
+                var diferenciaY = this.caballero.y - this.zorro.y;
+
+                   if (azar < 0.5)
+                {
+                    //regla 1: Movimiento vertical (arriba/abajo)
+                    if (diferenciaY < 0)
+                    {
+                        //El caballero está más arriba que el zorro
+                        this.validaActualizaMovimiento(this.zorro, ARRIBA);
+                    }
+                    else if (diferenciaY > 0)
+                    {
+                        //El caballero está más abajo que el zorro
+                        this.validaActualizaMovimiento(this.zorro, ABAJO);
+                    }
+                    else
+                    {
+                        //Están a la misma altura, regla 2
+                        if (diferenciaX > 0)
+                        {
+                            this.validaActualizaMovimiento(this.zorro, DERECHA);
+                        }
+                        else if (diferenciaX < 0)
+                        {
+                            this.validaActualizaMovimiento(this.zorro, IZQUIERDA);
+                        }
+                    }
+                }
+                else
+                {
+                    // Regla 2: Movimiento horizontal 
+                    if (diferenciaX > 0)
+                    {
+                        // El caballero está más a la derecha que el zorro
+                        this.validaActualizaMovimiento(this.zorro, DERECHA);
+                    }
+                    else if (diferenciaX < 0)
+                    {
+                        // El caballero está más a la izquierda que el zorro
+                        this.validaActualizaMovimiento(this.zorro, IZQUIERDA);
+                    }
+                    else
+                    {
+                        // Están en la misma columna, regla 1
+                        if (diferenciaY < 0)
+                        {
+                            this.validaActualizaMovimiento(this.zorro, ARRIBA);
+                        }
+                        else if (diferenciaY > 0)
+                        {
+                            this.validaActualizaMovimiento(this.zorro, ABAJO);
+                        }
+                    }
+                }
+                                        
+			}
+			
+			//dado un contexto gráfico, dibuja el mapa en él
+			//por simplificar, asumimos que el contexto gráfico adecuado de 24x11 elementos de 24x24 puntos
+			this.dibuja = function(lienzo)
+			{
+				contexto = lienzo.getContext('2d');	
+				contexto.clearRect(0, 0, lienzo.width, lienzo.height);
+				//dibujamos el mapa
+				for (var x = 0; x < ANCHOMAPA; x++)
+				{
+					for (var y = 0; y < ALTOMAPA; y++)
+					{
+						listaTiles[this.mapa[y][x]].dibuja(contexto, x*ANCHOSPRITE, y*ALTOSPRITE, 1)
+					
+					}
+				}
+				
+				//dibujamos al caballero				
+				this.caballero.dibujaActor(contexto);
+					
+				//dibujamos al zorro
+				this.zorro.dibujaActor(contexto);
+				
+				
+				//usado durante depuración
+				if (muestraTraza == true)
+					{
+						this.trazaMapa();
+					}
+								
+			}
+			
+			//función usada durante depuración
+			this.trazaMapa = function()
+			{
+				
+						var tileCaballero = calculaTileOcupada(this.caballero.x, this.caballero.y);
+						var tileZorro = calculaTileOcupada(this.zorro.x, this.zorro.y);
+						parrafo.innerHTML = "Caballero x:" + this.caballero.x + " y:" + this.caballero.y  +
+								" Zorro x:" + this.zorro.x + " y:" + this.zorro.y;
+						
+						if (muestraRejilla == true)
+						{
+							for (var x = 0; x < ANCHOMAPA; x++)
+							{
+								for (var y = 0; y < ALTOMAPA; y++)
+								{
+									marcaTile(x,y, "red");
+								}
+							}
+						}
+						marcaTile(tileCaballero.x1, tileCaballero.y1, "black");					
+						marcaTile(tileZorro.x1, tileZorro.y1, "grey");					
+						
+						if (this.camino.length != 0)
+						{
+							parrafo2.innerHTML = this.camino;
+						}
+						else
+						{
+							parrafo2.innerHTML = "Zorro detenido";
+						}
+						for (var tile = 0; tile < this.camino.length; tile++)
+						{
+								marcaTile(this.camino[tile].y, this.camino[tile].x, "yellow");
+						}
+				}
+		
+		}		
+		
+		
+		//cargamos los tiles y sprites. Los mostramos por pantalla a efectos ilustrativos aunque tal cosa no es necesaria en un juego de verdad
+		function cargaImagen()
+		 {
+			var imagenTiles = new Image();
+			
+			imagenTiles.src = "tiles-map.png";
+			
+			imagenTiles.onload = function()
+			{
+				contextoTiles.drawImage(imagenTiles,0,0);
+				//creamos los sprites cuando se ha cargado la imagen
+				var spriteID = 0;
+				for (var ySprite = 0; ySprite < 6; ySprite++)
+				{
+					for (var xSprite = 0; xSprite < 6; xSprite++)
+					{
+						var x = xSprite*ANCHOSPRITE;
+						var y = ySprite*ALTOSPRITE;
+						listaTiles[spriteID] = new constructorSprite(imagenTiles, x, y, ANCHOSPRITE, ALTOSPRITE);
+						spriteID++;
+					
+					}
+				}
+				//cargamos el tile 27
+				listaTiles[spriteID] = new constructorSprite(imagenTiles, 6*ANCHOSPRITE, 0, ANCHOSPRITE, ALTOSPRITE);
+				muestraSprites(contextoTilesSeleccionados, listaTiles);				
+			}						
+
+			var imagenSprites = new Image();
+			imagenSprites.src = "sprites-map.png";
+			
+			imagenSprites.onload = function()
+			{
+				contextoSprites.drawImage(imagenSprites,0,0);
+				//creamos los sprites cuando se ha cargado la imagen
+				var spriteID = 0;
+				
+				var ySprite = 0;//primera fila
+				for (var xSprite = 0; xSprite < 8; xSprite++)
+				{
+					var x = xSprite*ANCHOSPRITE;
+					var y = ySprite*ALTOSPRITE;
+					listaSprites[spriteID] = new constructorSprite(imagenSprites, x, y, ANCHOSPRITE, ALTOSPRITE);
+					spriteID++;
+				
+				}
+
+				var ySprite = 16;//caracter del zorro
+				for (var xSprite = 0; xSprite < 8; xSprite++)
+				{
+					var x = xSprite*ANCHOSPRITE;
+					var y = ySprite*ALTOSPRITE;
+					listaSprites[spriteID] = new constructorSprite(imagenSprites, x, y, ANCHOSPRITE, ALTOSPRITE);
+					spriteID++;
+				
+				}
+				
+				muestraSprites(contextoSpritesSeleccionados, listaSprites);			
+
+				graficosCargados = true;
+			}			
+		}		
+		//muestra todos los sprites
+		function muestraSprites(contexto, lista)
+		{
+			for (var sprite = 0; sprite < lista.length; sprite++)
+			{
+				lista[sprite].dibuja(contexto, sprite*24, 0);
+			}
+		}
+	</script>
+  </body>
+</html>  
