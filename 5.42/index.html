@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Ejercicio 41. Mapas</title>
+<meta charset="UTF-8" />
+    <style>
+      canvas {
+        margin: 0px;
+        padding: 0px;
+		border:1px solid #000000;
+		background-color: lightgray;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <canvas id="lienzoAnimacion" width="576" height="264"></canvas>
+	</div>
+	<div>
+      <canvas id="lienzoSpritesSeleccionados" width="384" height="24"></canvas>
+	 </div>
+	 <div>
+      <canvas id="lienzoTilesSeleccionados" width="888" height="24"></canvas>
+	</div>		
+	<div>
+      <canvas id="lienzoSprites" width="192" height="648"></canvas>
+      <canvas id="lienzoTiles" width="264" height="336"></canvas>
+	</div>	
+	
+	<div>
+	  <p id="parrafo">Texto</p>
+	</div>
+    <script>
+		var contextoAnimacion = document.getElementById('lienzoAnimacion').getContext('2d');
+		var contextoSprites = document.getElementById('lienzoSprites').getContext('2d');
+		var contextoSpritesSeleccionados = document.getElementById('lienzoSpritesSeleccionados').getContext('2d');	
+		var contextoTiles = document.getElementById('lienzoTiles').getContext('2d');		
+		var contextoTilesSeleccionados = document.getElementById('lienzoTilesSeleccionados').getContext('2d');				
+		
+		var lienzoAnimacion = document.getElementById('lienzoAnimacion');
+		var lienzoSprites = document.getElementById('lienzoSprites');
+		var lienzoSpritesSeleccionados = document.getElementById('lienzoSpritesSeleccionados');
+		var lienzoTiles = document.getElementById('lienzoTiles');
+		var lienzoTilesSeleccionados = document.getElementById('lienzoTilesSeleccionados');
+		
+		var parrafo = document.getElementById('parrafo');
+
+		var maxX = lienzoAnimacion.width;
+		var maxY = lienzoAnimacion.height;
+		
+		var CABALLERO = 0; //posición inicial del sprite del caballero
+		var ZORRO     = 8; //posición inicial del sprite del zorro
+		var HIERBA    = 0;
+
+		
+		var ANCHOSPRITE = 24;
+		var ALTOSPRITE = 24;
+		
+		var graficosCargados = false;
+		//variable para guardar todos los sprites
+		var listaSprites = new Array(16);
+		var listaTiles = new Array(37);
+		
+		var caballero;
+        var zorro;
+		
+		cargaImagen();
+		var mapa = new constructorMapa();
+		
+		requestAnimationFrame(actualizaCuadro);
+		
+		
+		function actualizaCuadro()
+		{
+			if (graficosCargados == true){			
+				mapa.dibuja(lienzoAnimacion);
+                caballero.dibuja(lienzoAnimacion);
+                zorro.dibuja(lienzoAnimacion);
+            }
+			requestAnimationFrame(actualizaCuadro);
+		}
+		//constructor para personajes
+        function constructorPersonaje(x, y, spriteInicial)
+        {
+            this.x = x;
+            this.y = y;
+            this.spriteActual = spriteInicial; //índice del sprite actual en la lista de sprites
+
+            this.dibuja = function(lienzo)
+            {
+                var contexto = lienzo.getContext('2d');
+                listaSprites[this.spriteActual].dibuja(contexto, this.x*ANCHOSPRITE, this.y*ALTOSPRITE);
+            }
+        }
+		
+		//constructor para cada objeto de tipo sprite
+		//le pasamos una imagen y las coordenadas de la imagen de donde coger el sprite
+        function constructorSprite (imagenFuente, x, y, ancho, alto)
+        {			
+            var imagen = imagenFuente;
+            this.x = x;
+            this.y = y;
+            this.ancho = ancho;
+            this.alto = alto;
+            
+            //dibuja el sprite en el contexto dado, en la posición x,y
+            this.dibuja = function(contexto, x, y)
+            {
+                contexto.drawImage(imagen, this.x, this.y, this.ancho, this.alto, x, y, this.ancho, this.alto);
+            
+            }
+        }
+		
+		function constructorMapa()
+		{
+			var ANCHO = 24;
+			var ALTO  = 11;
+			this.mapa =
+			[
+				[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+				[6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 6],
+				[6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 6],
+				[6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 6],
+				[6, 7, 0, 0, 0, 0, 0, 0,10,13,13,14, 0, 0, 2,17,32,32,11, 0, 0, 0, 8, 6],
+				[6, 7, 0, 8, 6, 6, 6, 7,24,25,25,26, 0, 0, 2,34,31,31,35, 0, 0, 0, 8, 6],
+				[6, 7, 0, 0, 0, 0, 0, 0,24,25,25,26, 0, 0, 2,29,33,33,36, 0, 0, 0, 8, 6],
+				[6, 7, 0, 0, 0, 0, 0, 0,24,25,25,26, 0, 0, 2, 3, 2, 3, 2, 3, 0, 0, 8, 6],
+				[6, 7, 0, 0, 0, 0, 0, 0,18,19,19,28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 6],
+				[6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 6],
+				[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]
+			];
+					
+			//dado un lienzo, dibuja el mapa en él
+			//por simplificar, asumimos que el contexto gráfico adecuado de 24x11 elementos de 24x24 puntos
+			this.dibuja = function(lienzo)
+			{
+				contexto = lienzo.getContext('2d');	
+				contexto.clearRect(0, 0, lienzo.width, lienzo.height);
+				for (var x = 0; x < ANCHO; x++)
+				{
+					for (var y = 0; y < ALTO; y++)
+					{
+						listaTiles[this.mapa[y][x]].dibuja(contexto, x*ANCHOSPRITE, y*ALTOSPRITE, 1)
+					
+					}
+				}
+			}
+		
+		}		
+		
+		
+		
+		//cargamos los tiles y sprites. Los mostramos por pantalla a efectos ilustrativos aunque tal cosa no es necesaria en un juego de verdad
+		function cargaImagen()
+		 {
+			var imagenTiles = new Image();
+			
+			imagenTiles.src = "tiles-map.png";
+			
+			imagenTiles.onload = function()
+			{
+				contextoTiles.drawImage(imagenTiles,0,0);
+				//creamos los sprites cuando se ha cargado la imagen
+				var spriteID = 0;
+				for (var ySprite = 0; ySprite < 6; ySprite++)
+				{
+					for (var xSprite = 0; xSprite < 6; xSprite++)
+					{
+						var x = xSprite*ANCHOSPRITE;
+						var y = ySprite*ALTOSPRITE;
+						listaTiles[spriteID] = new constructorSprite(imagenTiles, x, y, ANCHOSPRITE, ALTOSPRITE);
+						spriteID++;
+					
+					}
+				}
+				//cargamos el tile 27
+				listaTiles[spriteID] = new constructorSprite(imagenTiles, 6*24, 0, ANCHOSPRITE, ALTOSPRITE);
+				muestraSprites(contextoTilesSeleccionados, listaTiles);				
+			}						
+
+			var imagenSprites = new Image();
+			imagenSprites.src = "sprites-map.png";
+			
+			imagenSprites.onload = function()
+			{
+                contextoSprites.drawImage(imagenSprites,0,0);
+                //creamos los sprites cuando se ha cargado la imagen
+                var spriteID = 0;
+                
+                var ySprite = 0;//primera fila
+                for (var xSprite = 0; xSprite < 8; xSprite++)
+                {
+                    var x = xSprite*ANCHOSPRITE;
+                    var y = ySprite*ALTOSPRITE;
+                    listaSprites[spriteID] = new constructorSprite(imagenSprites, x, y, ANCHOSPRITE, ALTOSPRITE);
+                    spriteID++;
+                
+                }
+
+                var ySprite = 16;//caracter del zorro
+                for (var xSprite = 0; xSprite < 8; xSprite++)
+                {
+                    var x = xSprite*ANCHOSPRITE;
+                    var y = ySprite*ALTOSPRITE;
+                    listaSprites[spriteID] = new constructorSprite(imagenSprites, x, y, ANCHOSPRITE, ALTOSPRITE);
+                    spriteID++;
+                
+                }
+                
+                muestraSprites(contextoSpritesSeleccionados, listaSprites);			
+
+                graficosCargados = true;
+                
+                //Inicializamos los personajes después de cargar los sprites
+                caballero = new constructorPersonaje(3, 3, CABALLERO);
+                zorro = new constructorPersonaje(18, 5, ZORRO);
+            }			
+		}		
+		//muestra todos los sprites en el lienzo superior
+		function muestraSprites(contexto, lista)
+		{
+			for (var sprite = 0; sprite < lista.length; sprite++)
+			{
+				lista[sprite].dibuja(contexto, sprite*24, 0);
+			}
+		}
+	</script>
+  </body>
+</html>
