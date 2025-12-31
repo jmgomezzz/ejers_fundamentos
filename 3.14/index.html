@@ -1,7 +1,9 @@
+<!-- TEMA 3, EJERCICIO 14-->
+ <!-- Realizado por José Manuel Gómez Ruiz e Irene Mendoza Mederos-->
 <!DOCTYPE html>
 <html>
 <head>
-<title>Ejercicio 13. Gestión básica de ratón</title>
+<title>Ejercicio 14.</title>
 <meta charset="UTF-8" />
 <style>
 div {
@@ -72,14 +74,20 @@ function manejaratongenerico(e)
 		case "mousedown":this.eventosmousedown++;break;
 		case "mouseup":this.eventosmouseup++;break;
 		case "mouseover":this.eventosmouseover++;
+                        if (!this.isResizing){
                          this.style.backgroundColor = "red";
+                        }
 						 break;
 		case "mouseout":this.eventosmouseout++;
+                        if (!this.isResizing){
 		                this.style.backgroundColor = "lightgray";
+                        }
 		                break;
 		case "mousemove":this.eventosmousemove++;break;
 		case "click":this.eventosclick++;
+                    if (!this.isResizing){
 		             this.style.backgroundColor = "green";
+                    }
 					 break;
 		case "contextmenu":this.eventoscontextmenu++;break;
 		case "dblclick":
@@ -141,26 +149,7 @@ function manejaratongenerico(e)
 	
 }
 
-function manejateclado (e)
-{
-	if (e.type === "keydown")
-	{
-		switch (e.key)
-		{
-			case "ArrowRight": X++; break;
-			case "ArrowLeft": if (X > 0) X--; break;
-			case "ArrowUp": Y++; break;
-			case "ArrowDown": if (Y > 0) Y--;break;
-		}
-	}
-	var texto = "X:" + X + " Y:" + Y;
-	document.getElementById("parrafo3").innerHTML = texto;
-	document.getElementById("cuadro1").style.height = Y+"px";
-	document.getElementById("cuadro1").style.width = X+"px";
-	document.getElementById("cuadro2").style.height = Y+"px";
-	document.getElementById("cuadro2").style.width = X+"px";
 
-}
 
 // inicializar al cargar
 window.addEventListener("load", function () {
