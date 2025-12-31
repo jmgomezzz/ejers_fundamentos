@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Ejercicio 39. Movimiento no lineal 2</title>
+<meta charset="UTF-8" />
+    <style>
+      canvas {
+        margin: 0px;
+        padding: 0px;
+		border:1px solid #000000;
+		background-color: lightgray;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <canvas id="lienzoAnimacion" width="800" height="600"></canvas>
+	</div>	
+	<div>
+	  <p id="parrafo">Texto</p>
+	</div>
+	<script src="easing.js"></script>
+    <script>
+		var contextoAnimacion = document.getElementById('lienzoAnimacion').getContext('2d');
+		var lienzoAnimacion = document.getElementById('lienzoAnimacion');
+		var parrafo = document.getElementById('parrafo');
+
+		var maxX = lienzoAnimacion.width;
+		var maxY = lienzoAnimacion.height;
+		
+		var radio = 50;
+		var xstartValue = radio;
+		var xchangeInValue = maxX - radio*2 ;
+		var ystartValue = radio;
+		var ychangeInValue = maxY - radio*2;	
+		var totalIterations = 600;
+		var currentIteration = 0;
+		
+		requestAnimationFrame(actualizaCuadro);
+
+		//esta función dibuja el sprite desplazándolo a la derecha un poco cada vez
+		function actualizaCuadro()
+		{			
+
+			var x = 400;
+			var y = easeOutBounce(currentIteration, ystartValue, ychangeInValue, totalIterations);
+
+			contextoAnimacion.clearRect(0, 0, maxX, maxY);						
+			contextoAnimacion.beginPath();
+			contextoAnimacion.arc(x, y, radio, 0, Math.PI * 2, false);
+			contextoAnimacion.stroke()
+			contextoAnimacion.closePath();
+			
+			currentIteration++;
+			parrafo.innerHTML = "Coordenada x:" + Math.floor(x) + " Coordenada y:" + Math.floor(y);
+
+			if (currentIteration <= totalIterations)
+				requestAnimationFrame(actualizaCuadro);
+		}
+	</script>
+  </body>
+</html>  
