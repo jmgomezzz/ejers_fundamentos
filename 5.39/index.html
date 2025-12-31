@@ -1,7 +1,9 @@
+<!-- TEMA 5, EJERCICIO 39-->
+ <!-- Realizado por José Manuel Gómez Ruiz e Irene Mendoza Mederos-->
 <!DOCTYPE html>
 <html>
 <head>
-<title>Ejercicio 39. Movimiento no lineal 2</title>
+<title>Ejercicio 39.</title>
 <meta charset="UTF-8" />
     <style>
       canvas {
@@ -43,6 +45,7 @@
 		{			
 
 			var x = 400;
+			var x = easeLinear(currentIteration, xstartValue, xchangeInValue, totalIterations);
 			var y = easeOutBounce(currentIteration, ystartValue, ychangeInValue, totalIterations);
 
 			contextoAnimacion.clearRect(0, 0, maxX, maxY);						
