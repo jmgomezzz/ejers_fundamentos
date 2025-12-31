@@ -1,2 +1,142 @@
+<!-- TEMA 3, EJERCICIO 10-->
+ <!-- Realizado por José Manuel Gómez Ruiz e Irene Mendoza Mederos-->
+<!DOCTYPE html>
+<html>
+<head>
+<title>Ejercicio 10.</title>
+<meta charset="UTF-8" />
+<style>
+div {
+    width: 400px;
+    height: 400px;
+    border: 1px solid black;
+    margin: 10px;
+    float: left;
+    padding: 30px;
+    text-align: center;
+    background-color: lightgray;
+}
+p {
+    background-color: white;
+	text-align: left;	
+}
+</style>
+</head>
+<body>
+<table>
+<td>
+<div id="cuadro1"><p id="parrafo1">Párrafo1</p></div> 
+</td>
+<td>
+<div id="cuadro2"><p id="parrafo2">Párrafo2</p></div> 
+</td>
+</table>
+
+<p id="parrafo3">Párrafo 3</p>
+
+<script>
+
+window.addEventListener("keypress", manejateclado, false);
+window.addEventListener("keyup", manejateclado, false);
+window.addEventListener("keydown", manejateclado, false);
+var X = 400, Y = 400;
+
+// Inicializar propiedades de contadores en cada cuadro
+var cuadro1 = document.getElementById("cuadro1");
+var cuadro2 = document.getElementById("cuadro2");
+
+cuadro1.contadores = {
+    mousedown: 0, mouseup: 0, mouseover: 0, mouseout: 0,
+    mousemove: 0, click: 0, contextmenu: 0, dblclick: 0
+};
+cuadro1.parrafo = cuadro1.getElementsByTagName("p")[0];
+
+cuadro2.contadores = {
+    mousedown: 0, mouseup: 0, mouseover: 0, mouseout: 0,
+    mousemove: 0, click: 0, contextmenu: 0, dblclick: 0
+};
+cuadro2.parrafo = cuadro2.getElementsByTagName("p")[0];
+
+// Contadores globales para párrafo 3
+var contadoresGlobales = {
+    mousedown: 0, mouseup: 0, mouseover: 0, mouseout: 0,
+    mousemove: 0, click: 0, contextmenu: 0, dblclick: 0
+};
+
+// Event listeners para ambos cuadros usando el mismo manejador
+cuadro1.addEventListener("mousedown", manejaratonCuadros, false);
+cuadro1.addEventListener("mouseup", manejaratonCuadros, false);
+cuadro1.addEventListener("mouseover", manejaratonCuadros, false);
+cuadro1.addEventListener("mouseout", manejaratonCuadros, false);
+cuadro1.addEventListener("mousemove", manejaratonCuadros, false);
+cuadro1.addEventListener("click", manejaratonCuadros, false);
+cuadro1.addEventListener("contextmenu", manejaratonCuadros, false);
+cuadro1.addEventListener("dblclick", manejaratonCuadros, false);
+
+cuadro2.addEventListener("mousedown", manejaratonCuadros, false);
+cuadro2.addEventListener("mouseup", manejaratonCuadros, false);
+cuadro2.addEventListener("mouseover", manejaratonCuadros, false);
+cuadro2.addEventListener("mouseout", manejaratonCuadros, false);
+cuadro2.addEventListener("mousemove", manejaratonCuadros, false);
+cuadro2.addEventListener("click", manejaratonCuadros, false);
+cuadro2.addEventListener("contextmenu", manejaratonCuadros, false);
+cuadro2.addEventListener("dblclick", manejaratonCuadros, false);
+
+function actualizarParrafo3() {
+    var textoRaton = "mousedown:" + contadoresGlobales.mousedown + 
+                     " mouseup:" + contadoresGlobales.mouseup +
+                     " mouseout:" + contadoresGlobales.mouseout + 
+                     " mouseover:" + contadoresGlobales.mouseover +
+                     " mousemove:" + contadoresGlobales.mousemove + 
+                     " click:" + contadoresGlobales.click +
+                     " contextmenu:" + contadoresGlobales.contextmenu + 
+                     " dblclick:" + contadoresGlobales.dblclick;
+    var textoTeclado = " | X:" + X + " Y:" + Y;
+    document.getElementById("parrafo3").innerHTML = textoRaton + textoTeclado;
+}
+
+function manejaratonCuadros(e){
+    var cuadro = e.currentTarget;
+    var tipoEvento = e.type;
+    
+    // Actualizar contador del cuadro específico
+    cuadro.contadores[tipoEvento]++;
+    
+    // Actualizar contador global
+    contadoresGlobales[tipoEvento]++;
+    
+    // Actualizar texto del párrafo correspondiente, usando la referencia guardada
+    var c = cuadro.contadores;
+    var texto = "mousedown:" + c.mousedown + " mouseup:" + c.mouseup +
+                " mouseout:" + c.mouseout + " mouseover:" + c.mouseover +
+                " mousemove:" + c.mousemove + " click:" + c.click +
+                " contextmenu:" + c.contextmenu + " dblclick:" + c.dblclick;
+    
+    cuadro.parrafo.innerHTML = texto;
+    
+    if (tipoEvento === "contextmenu") e.preventDefault();
+    actualizarParrafo3();
+}
+
+function manejateclado (e){
+    if (e.type === "keydown"){
+        switch (e.key){
+            case "ArrowRight": X++; break;
+            case "ArrowLeft": if (X > 0) X--; break;
+            case "ArrowUp": Y++; break;
+            case "ArrowDown": if (Y > 0) Y--;break;
+        }
+    }
+    actualizarParrafo3();
+    cuadro1.style.height = Y+"px";
+    cuadro1.style.width = X+"px";
+    cuadro2.style.height = Y+"px";
+    cuadro2.style.width = X+"px";
+}
+
+</script>
+
+</body>
+</html>
 
 
