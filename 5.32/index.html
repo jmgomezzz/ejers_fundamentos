@@ -1,0 +1,143 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Ejercicio 31. Animación con sprites</title>
+<meta charset="UTF-8" />
+    <style>
+      canvas {
+        margin: 0px;
+        padding: 0px;
+		border:1px solid #000000;
+		background-color: lightgray;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <canvas id="lienzoAnimacion" width="800" height="400"></canvas>
+	</div>
+	<div>
+      <canvas id="lienzoSprites" width="224" height="268"></canvas>
+	</div>	
+	<div>
+	  <p id="parrafo">Texto</p>
+	</div>
+    <script>
+		var contextoAnimacion = document.getElementById('lienzoAnimacion').getContext('2d');
+		var contextoSprites = document.getElementById('lienzoSprites').getContext('2d');
+		var lienzoAnimacion = document.getElementById('lienzoAnimacion');
+		var lienzoSprites = document.getElementById('lienzoSprites');
+		var parrafo = document.getElementById('parrafo');
+
+		var maxX = lienzoAnimacion.width;
+		var maxY = lienzoAnimacion.height;
+		
+		//variable para guardar todos los sprites
+		var listaSprites = Array(32);
+		
+		var velocidad = 7;
+		var posSpriteX = 0;
+		var numeroSprite = 16;
+		
+		var temporizador;
+		
+		//esta función dibuja el sprite desplazándolo a la derecha un poco cada vez
+		function actualizaCuadro()
+		{			
+			contextoAnimacion.clearRect(0, 0, maxX, maxY);
+			listaSprites[numeroSprite].dibuja(contextoAnimacion, posSpriteX, 200, 1);
+			posSpriteX += velocidad;
+			numeroSprite++;
+
+			if (posSpriteX > 400)
+			{
+				velocidad = -velocidad;
+				numeroSprite = 8;
+			}
+				
+			if (posSpriteX < 0)
+			{
+				velocidad = -velocidad;
+				numeroSprite = 16;
+			}
+
+			if (velocidad > 0)
+			{				
+				if (numeroSprite > 23)
+					numeroSprite = 16;
+
+			}
+			if (velocidad < 0)
+			{
+				if (numeroSprite > 15)
+					numeroSprite = 8;
+			
+			}
+		}
+		
+		
+		//constructor para cada objeto de tipo sprite
+		//le pasamos una imagen y las coordenadas de la imagen de donde coger el sprite
+		function constructorSprite (imagenFuente, x, y, ancho, alto)
+		{			
+			var imagen = imagenFuente;
+			this.x = x;
+			this.y = y;
+			this.ancho = ancho;
+			this.alto = alto;
+			
+			//dibuja el sprite en el contexto dado, en la posición x,y y con el tamaño acorde a la escala. escala = 1 es 100% del tamaño original
+			this.dibuja = function(contexto, x, y, escala)
+			{
+				contexto.drawImage(imagen, this.x, this.y, this.ancho, this.alto, x, y, this.ancho*escala, this.alto*escala);
+			
+			}			
+		};		
+		
+				
+		cargaImagen(contextoSprites, "sprite.png");
+
+		
+		
+		function cargaImagen(contexto, nombreImagen)
+		 {
+			var imagen = new Image();
+			
+			imagen.src = nombreImagen;
+				
+			imagen.onload = function()
+			{
+				contexto.drawImage(imagen,0,0);
+				//creamos los sprites cuando se ha cargado la imagen
+				var spriteID = 0;
+				var anchoSprite = 28;
+				var altoSprite = 67;
+				for (var ySprite = 0; ySprite < 4; ySprite++)
+				{
+					for (var xSprite = 0; xSprite < 8; xSprite++)
+					{
+						var x = xSprite*anchoSprite;
+						var y = ySprite*altoSprite;
+						listaSprites[spriteID] = new constructorSprite(imagen, x, y, anchoSprite, altoSprite);
+						spriteID++;
+					
+					}
+				}
+				muestraSprites(contextoAnimacion);
+				temporizador = setInterval(actualizaCuadro, 250);
+			}
+		}
+		
+		//muestra todos los sprites en el lienzo superior
+		function muestraSprites(contexto)
+		{
+			for (var sprite = 0; sprite < listaSprites.length; sprite++)
+			{
+				listaSprites[sprite].dibuja(contexto, sprite*15, 50, 0.5);
+			}
+		}
+		
+		</script>
+  </body>
+</html>  
